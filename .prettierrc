@@ -1,0 +1,5 @@
+{
+  "singleQuote": false,
+  "singleAttributePerLine": true,
+  "printWidth": 60
+}
