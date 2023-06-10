@@ -13,7 +13,7 @@ const signToken = (id) => {
   });
 };
 
-const createSendToken = (user, statusCode, res) => {
+const createSendToken = (user, statusCode, req, res) => {
   const token = signToken(user._id);
 
   const cookieOptions = {
@@ -30,7 +30,14 @@ const createSendToken = (user, statusCode, res) => {
     httpOnly: true,
     //set httpOnly to true so cookie cannot be accessed or modified in any way by the browser
   };
-  if (process.env.NODE_ENV === "production")
+  // if (process.env.NODE_ENV === "production")
+  //   cookieOptions.secure = true;
+
+  //for proxy server https secure
+  if (
+    req.secure ||
+    req.headers("x-forwarded-proto") === "https"
+  )
     cookieOptions.secure = true;
   res.cookie("jwt", token, cookieOptions);
 
@@ -61,7 +68,7 @@ exports.signup = catchAsync(async (req, res, next) => {
   console.log(url);
   await new Email(newUser, url).sendWelcome();
 
-  createSendToken(newUser, 201, res);
+  createSendToken(newUser, 201, req, res);
 });
 
 exports.login = catchAsync(async (req, res, next) => {
@@ -87,7 +94,7 @@ exports.login = catchAsync(async (req, res, next) => {
     );
   }
 
-  createSendToken(user, 200, res);
+  createSendToken(user, 200, req, res);
 });
 
 exports.logout = (req, res) => {
@@ -289,7 +296,7 @@ exports.resetPassword = catchAsync(
     user.passwordResetExpires = undefined;
     await user.save();
 
-    createSendToken(user, 200, res);
+    createSendToken(user, 200, req, res);
   }
 );
 
@@ -315,6 +322,6 @@ exports.updatePassword = catchAsync(
     user.passwordConfirm = passwordConfirm;
     await user.save();
 
-    createSendToken(user, 200, res);
+    createSendToken(user, 200, req, res);
   }
 );

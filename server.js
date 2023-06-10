@@ -14,7 +14,10 @@ process.on("uncaughtException", (err) => {
 //NODE ENV
 // console.log(process.env.NODE_ENV);
 
-const DB = process.env.DATABASE.replace("<PASSWORD>", process.env.PASSWORD);
+const DB = process.env.DATABASE.replace(
+  "<PASSWORD>",
+  process.env.PASSWORD
+);
 mongoose.connect(DB).then((con) => {
   // console.log(con.connections);
   // console.log('DB connection connected');
@@ -46,5 +49,14 @@ process.on("unhandledRejection", (err) => {
   console.log(err.name, err.message);
   server.close(() => {
     process.exit(1);
+  });
+});
+
+process.on("SIGTERM", () => {
+  console.log("Sigterm received. Shutting down gracefully");
+  server.close(() => {
+    //Does need to implement process.exit()
+    //sigterm will shut down the application
+    console.log("Process terminated");
   });
 });

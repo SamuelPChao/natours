@@ -3,6 +3,7 @@ const path = require("path");
 const express = require("express");
 const morgan = require("morgan");
 const rateLimit = require("express-rate-limit");
+const cors = require("cors");
 const helmet = require("helmet");
 const mongoSanitize = require("express-mongo-sanitize");
 const xss = require("xss-clean");
@@ -20,6 +21,9 @@ const viewRouter = require("./routes/viewRoute");
 
 const app = express();
 
+//Trust Proxy Server(Heroku)
+app.enable("trust proxy");
+
 app.set("view engine", "pug");
 app.set("views", path.join(__dirname, "views"));
 app.use(express.static(path.join(__dirname, "public")));
@@ -30,9 +34,23 @@ app.use(express.static(path.join(__dirname, "public")));
 //   )
 // );
 
+app.use(cors());
+// app.use(
+//   cors({
+//     origin: "https://www.natours.com",
+//   })
+// );
+
+//handle non-simple request on preflight
+//options request sent before non-simple request to check if the request is safe to perform
+//using .options() to handle respond
+app.options("*", cors());
+// app.options("/api/v1/tours/:id", cors());
+
 //Middleware
 //SET Security HTTP Headers
-app.use(helmet({ contentSecurityPolicy: false }));
+// app.use(helmet({ contentSecurityPolicy: false }));
+app.use(helmet());
 //calling helmet to return a function waiting to be called
 
 //Development Logging
